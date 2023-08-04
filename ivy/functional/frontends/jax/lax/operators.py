@@ -13,6 +13,11 @@ _slice = builtins.slice
 
 
 @to_ivy_arrays_and_back
+def imag(x):
+    return ivy.imag(x)
+
+
+@to_ivy_arrays_and_back
 def abs(x):
     return ivy.abs(x)
 
@@ -278,6 +283,24 @@ def dot(lhs, rhs, precision=None, preferred_element_type=None):
 
 
 @to_ivy_arrays_and_back
+def batch_matmul(lhs, rhs, precision=None):
+    if lhs.ndim < 2 or rhs.ndim < 2:
+        raise ValueError(
+            "Arguments to batch_matmul must be at least 2D, got {}, {}".format(
+                lhs.ndim, rhs.ndim
+            )
+        )
+    if lhs.ndim != rhs.ndim:
+        raise ValueError(
+            "Arguments to batch_matmul must have same ndim, got {}, {}".format(
+                lhs.ndim, rhs.ndim
+            )
+        )
+    return ivy.matmul(lhs, rhs).astype(lhs.dtype)
+
+
+@with_unsupported_dtypes({"0.4.5 and below": ("bool",)}, "jax")
+@to_ivy_arrays_and_back
 def dot_general(
     lhs, rhs, dimension_numbers, precision=None, preferred_element_type=None
 ):
@@ -476,7 +499,7 @@ def shift_left(x, y):
 
 @to_ivy_arrays_and_back
 def sign(x):
-    return ivy.sign(x)
+    return ivy.sign(x, np_variant=False)
 
 
 @to_ivy_arrays_and_back
@@ -608,7 +631,7 @@ def reduce_window(
 
 @to_ivy_arrays_and_back
 def squeeze(array, dimensions):
-    return ivy.squeeze(array, dimensions)
+    return ivy.squeeze(array, axis=dimensions)
 
 
 @to_ivy_arrays_and_back
@@ -629,3 +652,8 @@ def conj(x):
 @to_ivy_arrays_and_back
 def is_finite(x):
     return ivy.isfinite(x)
+
+
+@to_ivy_arrays_and_back
+def cbrt(x):
+    return ivy.pow(x, 1 / 3)
